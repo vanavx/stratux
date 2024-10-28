@@ -6,7 +6,6 @@ else
 	LFLAGS=-X main.stratuxVersion=`git describe --tags --abbrev=0` -X main.stratuxBuild=`git log -n 1 --pretty=%H`  
 	BUILDINFO=-ldflags "$(LFLAGS)"
 	BUILDINFO_STATIC=-ldflags "-extldflags -static $(LFLAGS)"
-	PLATFORMDEPENDENT=fancontrol
 endif
 
 ifeq ($(debug),true)
@@ -28,9 +27,6 @@ all: libdump978.so xdump1090 xrtlais gen_gdl90 $(PLATFORMDEPENDENT)
 
 gen_gdl90: main/*.go common/*.go libdump978.so
 	LIBRARY_PATH=$(CURDIR) CGO_CFLAGS_ALLOW="-L$(CURDIR)" go build $(BUILDINFO) -o gen_gdl90 -p 4 ./main/
-
-fancontrol: fancontrol_main/*.go common/*.go
-	go build $(BUILDINFO) -o fancontrol -p 4 ./fancontrol_main/
 
 xdump1090:
 	git submodule update --init dump1090
@@ -66,7 +62,6 @@ optinstall: www ogn/ddb.json
 
 	# binaries
 	cp -f gen_gdl90 $(STRATUX_HOME)/bin/
-	cp -f fancontrol $(STRATUX_HOME)/bin/
 	cp -f dump1090/dump1090 $(STRATUX_HOME)/bin
 	cp -f rtl-ais/rtl_ais $(STRATUX_HOME)/bin
 	cp -f $(OGN_RX_BINARY) $(STRATUX_HOME)/bin/ogn-rx-eu
@@ -106,9 +101,6 @@ optinstall: www ogn/ddb.json
 
 
 install: optinstall
-	-$(STRATUX_HOME)/bin/fancontrol remove
-	$(STRATUX_HOME)/bin/fancontrol install
-
 	# System configuration
 	cp image/10-stratux.rules /etc/udev/rules.d/10-stratux.rules
 	cp image/99-uavionix.rules /etc/udev/rules.d/99-uavionix.rules
@@ -118,7 +110,7 @@ install: optinstall
 
 
 clean:
-	rm -f gen_gdl90 libdump978.so fancontrol ahrs_approx
+	rm -f gen_gdl90 libdump978.so ahrs_approx
 	cd dump1090 && make clean
 	cd dump978 && make clean
 	cd rtl-ais && make clean
